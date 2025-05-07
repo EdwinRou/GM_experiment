@@ -29,33 +29,92 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Running the Experiment
+### Original Implementation
+
+The original implementation is available as a standalone Jupyter notebook:
+```bash
+jupyter notebook notebooks/original_implementation.ipynb
+```
+
+This notebook contains the complete experiment in a single file, which has been refactored into the modular structure described below.
+
+### Tutorial
+
+Get started with the tutorial notebook:
+```bash
+jupyter notebook tutorials/basic_experiment.ipynb
+```
+
+The tutorial demonstrates:
+- Data generation and loading
+- Model training and configuration
+- Sample generation and visualization
+- Model evaluation and comparison
+- Flow evolution visualization
+
+### Running from Python
+
+You can also use the modular components directly in Python:
 
 ```python
-# Generate datasets
-_, _, _ = generate_and_save_datasets()
+from src.data.dataset import get_dataloaders
+from src.utils.training import train_diffusion, train_flow
+from src.utils.visualization import plot_model_distributions
+
+# Get data
+train_loader, test_loader, x_coords = get_dataloaders(
+    batch_size=512,
+    num_train=4000,
+    num_test=1000
+)
 
 # Train models
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+x_coords = x_coords.to(device)
 
 # Train DDPM
-diffusion_model, x_coords, diffusion_losses = train_diffusion(
-    num_epochs=200,
-    batch_size=512,
-    save_interval=100,
+diffusion_model, _, _ = train_diffusion(
+    train_loader=train_loader,
+    test_loader=test_loader,
+    x_coords=x_coords,
     device=device
 )
 
 # Train Flow Matching
-flow_model, x_coords, test_data, flow_losses = train_flow(
-    num_epochs=200,
-    batch_size=512,
-    save_interval=100,
+flow_model, _, test_data, _ = train_flow(
+    train_loader=train_loader,
+    test_loader=test_loader,
+    x_coords=x_coords,
     device=device
 )
 
 # Compare results
-plot_model_distributions(diffusion_model, flow_model, x_coords, test_data, device)
+plot_model_distributions(
+    diffusion_samples=diffusion_model.generate_samples(100, device, x_coords),
+    flow_samples=flow_model.generate_samples(100, device, x_coords),
+    x_coords=x_coords,
+    test_data=test_data
+)
+```
+
+## Project Structure
+
+```
+src/
+├── models/              # Model implementations
+│   ├── attention.py    # Attention mechanisms
+│   ├── transformer.py  # Transformer block
+│   ├── ddpm.py        # DDPM implementation
+│   └── flow.py        # Flow Matching implementation
+├── data/               # Data handling
+│   └── dataset.py     # Dataset generation and loading
+├── utils/              # Utilities
+│   ├── metrics.py     # Distribution metrics
+│   ├── training.py    # Training loops
+│   └── visualization.py# Plotting functions
+└── experiment.py       # Main experiment runner
+
+tests/                  # Test files
 ```
 
 ## Key Components
@@ -79,6 +138,23 @@ Both models share common components:
 - Transformer blocks
 - Time embeddings
 - Positional encodings
+
+### Utilities
+
+1. **Data Handling**
+   - Mixture of Gaussians dataset generation
+   - DataLoader creation
+   - Dataset normalization
+
+2. **Training**
+   - Configurable training loops
+   - Learning rate scheduling
+   - Progress visualization
+
+3. **Evaluation**
+   - Distribution metrics (KL, JS, Wasserstein)
+   - Sample quality assessment
+   - Model comparison tools
 
 ## Results
 
