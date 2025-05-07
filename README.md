@@ -15,8 +15,8 @@ The experiment provides:
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
-cd [repository-name]
+git clone https://github.com/EdwinRou/GM_experiment.git
+cd GM_experiment
 ```
 
 2. Install PyTorch:
