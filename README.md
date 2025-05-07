@@ -1,6 +1,6 @@
 # Diffusion and Flow Matching Experiment
 
-This project implements and compares two state-of-the-art generative modeling techniques: Denoising Diffusion Probabilistic Models (DDPM) and Flow Matching. Both models are implemented using transformer-based architectures and are trained on a mixture of Gaussian distributions dataset.
+This project implements and compares two modern generative modeling techniques: Denoising Diffusion Probabilistic Models (DDPM) and Flow Matching. Both models are implemented using transformer-based architectures and are trained on a mixture of Gaussian distributions dataset.
 
 ## Overview
 
