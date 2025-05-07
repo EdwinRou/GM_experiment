@@ -22,10 +22,16 @@ cd GM_experiment
 2. Install PyTorch:
    Visit the [official PyTorch installation guide](https://pytorch.org/get-started/locally/) to install the correct version for your system.
 
-3. Install other dependencies:
+3. Install dependencies and development setup:
 ```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Install project in development mode
+pip install -e .
 ```
+
+The development installation allows you to modify the code while using the package, and includes test dependencies.
 
 ## Usage
 
@@ -88,10 +94,25 @@ flow_model, _, test_data, _ = train_flow(
     device=device
 )
 
+# Generate samples for comparison
+with torch.no_grad():
+    # Generate Diffusion samples
+    diffusion_samples = diffusion_model.generate_samples(100, device, x_coords)
+    
+    # Generate Flow samples
+    flow_samples = torch.randn(100, len(x_coords)).to(device)
+    time_steps = torch.linspace(0, 1.0, 100, device=device)
+    for i in range(len(time_steps)-1):
+        flow_samples = flow_model.step(
+            x_t=flow_samples,
+            t_start=time_steps[i],
+            t_end=time_steps[i+1]
+        )
+
 # Compare results
 plot_model_distributions(
-    diffusion_samples=diffusion_model.generate_samples(100, device, x_coords),
-    flow_samples=flow_model.generate_samples(100, device, x_coords),
+    diffusion_samples=diffusion_samples,
+    flow_samples=flow_samples,
     x_coords=x_coords,
     test_data=test_data
 )
@@ -100,21 +121,25 @@ plot_model_distributions(
 ## Project Structure
 
 ```
-src/
-├── models/              # Model implementations
-│   ├── attention.py    # Attention mechanisms
-│   ├── transformer.py  # Transformer block
-│   ├── ddpm.py        # DDPM implementation
-│   └── flow.py        # Flow Matching implementation
-├── data/               # Data handling
-│   └── dataset.py     # Dataset generation and loading
-├── utils/              # Utilities
-│   ├── metrics.py     # Distribution metrics
-│   ├── training.py    # Training loops
-│   └── visualization.py# Plotting functions
-└── experiment.py       # Main experiment runner
-
-tests/                  # Test files
+.
+├── notebooks/          # Reference implementations
+│   └── original_implementation.ipynb
+├── tutorials/          # Tutorial notebooks
+│   └── basic_experiment.ipynb
+├── src/               # Source code
+│   ├── models/        # Model implementations
+│   │   ├── attention.py    # Attention mechanisms
+│   │   ├── transformer.py  # Transformer block
+│   │   ├── ddpm.py        # DDPM implementation
+│   │   └── flow.py        # Flow Matching implementation
+│   ├── data/         # Data handling
+│   │   └── dataset.py     # Dataset generation and loading
+│   ├── utils/        # Utilities
+│   │   ├── metrics.py     # Distribution metrics
+│   │   ├── training.py    # Training loops
+│   │   └── visualization.py# Plotting functions
+│   └── experiment.py  # Main experiment runner
+└── tests/            # Test files
 ```
 
 ## Key Components
